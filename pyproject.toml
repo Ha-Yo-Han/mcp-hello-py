@@ -1,0 +1,18 @@
+# MCP Hello Server - Python 프로젝트 메타데이터
+# PEP 518 및 PEP 621 표준
+
+[project]
+name = "mcp-hello"
+version = "1.0.0"
+description = "Simple Hello MCP Server (Python) with FastMCP"
+requires-python = ">=3.11"
+dependencies = [
+    "mcp[cli]>=1.23.0",
+]
+
+[project.scripts]
+mcp-hello = "src.server:main"
+
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
