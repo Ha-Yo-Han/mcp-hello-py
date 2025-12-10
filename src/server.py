@@ -8,15 +8,15 @@ Simple Hello MCP Server
     - 단일 인사: 한 사람에게 "안녕하세요, {name}님!" 형태로 인사
     - 복수 인사: 여러 사람에게 한 번에 인사
     - MCP 프로토콜: Tools, Resources, Prompts 지원
-    - HTTP Stream 전송: HTTP/SSE를 통한 실시간 통신
+    - Streamable HTTP 전송: Cloud Run 등 서버리스 환경 지원
 
 사용 예시:
     HTTP 모드 실행:
-        $ python -m src.server --http-stream
-        -> http://0.0.0.0:8890/mcp
+        $ python src/server.py --http-stream
+        -> http://localhost:8080/mcp
     
     stdio 모드 실행:
-        $ python -m src.server
+        $ python src/server.py
     
     도구 호출:
         {"name": "say_hello", "arguments": {"name": "김철수"}}
@@ -26,6 +26,8 @@ Simple Hello MCP Server
 버전: 1.0.0
 라이선스: MIT
 """
+
+import os
 
 from mcp.server.fastmcp import FastMCP
 
@@ -37,7 +39,11 @@ mcp = FastMCP(
     name="mcp-hello",
     instructions="이름을 받아 한국어로 인사하는 간단한 MCP 서버입니다.",
     stateless_http=True,
+    json_response=True,
 )
+
+# Cloud Run 환경에서 Host 헤더 검증 비활성화
+os.environ.setdefault("MCP_ALLOW_ORIGIN", "*")
 
 
 # ============================================================================
@@ -212,7 +218,7 @@ def main():
     - 기본값: stdio 모드 (표준 입출력)
     
     환경 변수:
-        PORT: HTTP 서버 포트 (기본값: 8890)
+        PORT: HTTP 서버 포트 (기본값: 8080)
     
     사용 예시:
         HTTP 모드:
@@ -222,14 +228,27 @@ def main():
         stdio 모드:
             $ python src/server.py
     """
-    import os
     import sys
     
     if "--http-stream" in sys.argv:
-        port = int(os.environ.get("PORT", 8890))
-        mcp.settings.host = "0.0.0.0"
-        mcp.settings.port = port
-        mcp.run(transport="streamable-http")
+        import uvicorn
+        from starlette.applications import Starlette
+        from starlette.middleware import Middleware
+        from starlette.middleware.trustedhost import TrustedHostMiddleware
+        from starlette.routing import Mount
+        
+        port = int(os.environ.get("PORT", 8080))
+        
+        app = Starlette(
+            routes=[
+                Mount("/", app=mcp.streamable_http_app()),
+            ],
+            middleware=[
+                Middleware(TrustedHostMiddleware, allowed_hosts=["*"]),
+            ],
+        )
+        
+        uvicorn.run(app, host="0.0.0.0", port=port)
     else:
         mcp.run(transport="stdio")
 
