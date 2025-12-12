@@ -1,8 +1,11 @@
-# MCP Hello Server - Python 의존성 패키지
+# MCP Weather Nowcast Server - Python 의존성 패키지
 # 설치: pip install -r requirements.txt
 
 # MCP Python SDK (FastMCP 포함)
 mcp[cli]>=1.23.0
 
-# 환경 변수 관리
+# HTTP 클라이언트
+httpx>=0.27.0
+
+# 환경 변수 관리(.env 사용 시)
 python-dotenv>=1.0.0

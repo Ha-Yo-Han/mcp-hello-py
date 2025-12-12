@@ -1,17 +1,18 @@
-# MCP Hello Server - Python 프로젝트 메타데이터
+# MCP Weather Nowcast Server - Python 프로젝트 메타데이터
 # PEP 518 및 PEP 621 표준
 
 [project]
-name = "mcp-hello"
+name = "mcp-weather-forecast"
 version = "1.0.0"
-description = "Simple Hello MCP Server (Python) with FastMCP"
+description = "KMA Ultra Short Nowcast MCP Server (Python) with FastMCP"
 requires-python = ">=3.11"
 dependencies = [
-    "mcp[cli]>=1.23.0",
+	"mcp[cli]>=1.23.0",
+	"httpx>=0.27.0",
 ]
 
 [project.scripts]
-mcp-hello = "src.server:main"
+mcp-weather-forecast = "src.server:main"
 
 [build-system]
 requires = ["setuptools>=68.0"]
